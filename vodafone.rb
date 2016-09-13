@@ -9,8 +9,8 @@ require 'json'
 require 'net/http'
 
 class VodafoneUsage
-  PHONE_LOGO = "📱"
-  VODAFONE_LOGO = "iVBORw0KGgoAAAANSUhEUgAAAB0AAAAWCAYAAAA8VJfMAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAACXBIWXMAAAsTAAALEwEAmpwYAAAED2lUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS40LjAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyIKICAgICAgICAgICAgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iCiAgICAgICAgICAgIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIgogICAgICAgICAgICB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iPgogICAgICAgICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogICAgICAgICA8eG1wTU06RGVyaXZlZEZyb20gcmRmOnBhcnNlVHlwZT0iUmVzb3VyY2UiPgogICAgICAgICAgICA8c3RSZWY6aW5zdGFuY2VJRD54bXAuaWlkOkM2NTREMUM3MjdBOTExRTQ4MkM5OUJENEIzODAxN0I4PC9zdFJlZjppbnN0YW5jZUlEPgogICAgICAgICAgICA8c3RSZWY6ZG9jdW1lbnRJRD54bXAuZGlkOkM2NTREMUM4MjdBOTExRTQ4MkM5OUJENEIzODAxN0I4PC9zdFJlZjpkb2N1bWVudElEPgogICAgICAgICA8L3htcE1NOkRlcml2ZWRGcm9tPgogICAgICAgICA8eG1wTU06RG9jdW1lbnRJRD54bXAuZGlkOkM2NTREMUNBMjdBOTExRTQ4MkM5OUJENEIzODAxN0I4PC94bXBNTTpEb2N1bWVudElEPgogICAgICAgICA8eG1wTU06SW5zdGFuY2VJRD54bXAuaWlkOkM2NTREMUM5MjdBOTExRTQ4MkM5OUJENEIzODAxN0I4PC94bXBNTTpJbnN0YW5jZUlEPgogICAgICAgICA8eG1wOkNyZWF0b3JUb29sPkFkb2JlIFBob3Rvc2hvcCBDUzUgV2luZG93czwveG1wOkNyZWF0b3JUb29sPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KrLmX3AAAAylJREFUSA3tVc9PE0EUfrvdbolFqBpCBEs8qCUcqCc8AiEeoTf+CIkhGjwgMeFgTEyMifgr6H/AwRjxQrTBniRc2kJIKzSSYE0LLVtoLd3uzO44b6VNaXarqEdeMt2d9973fTPz3nQBTszmBBhjIh+O6pieFm1S/93NRQQ+JCumxcVFCeNWsb/2ccIju0msrnp3Gevh40ItaX1ebaz2/berQyJBEAwEZdPpgMvtHhMkqbekKO4f0Uix7JSjDp/v+eWurneYU5uP82MbJ6guSlGUh3xuWjGRYMlb4yw584SV9vfZ9s4Oi62tPagI8KQqruL74ycHmzXM5XLjv+QY24vF1PTEbbIBQNMrK6RAdfV7MsnS6RQLh8NjSM5zj5SjXtA2iM3Bj5XG4/EOpyRNIvAgm9VKb9+41EePpbLP69h6/UraCn1yMVHUymUNxaaWlpbasRxzc3OOerHK3FZ0YGDAzDnb2nrd3dzcTgGMUjTiJJNTQC96QGcMyNNnEB8aYulIRKaM6bLTed4wjCEEtrW12R6xnSgCzOYBQbiEJKRcZmokbBJJ5zqgqZCC1j4/nAYQMsGPQFSVCaKIeVcwv5FZ3jsOYHyYApRS4KsHquugOSTsEN68ThCZDs7CHjh5onZwgGKg47um8d/GZrdTRJkxVdM2Cvk8UMMQRf9VyPJAYT0KrN0HRaLBDl/gqZ4eoPxIioUCaJSuN5Y8JLZJwt2CqqoflFxum2maIHd3E2l2FlI5gM3oF0gkUuC+MyGc6btWJkRz7OfzKX4yQcRlMhkTj+/1Zh5hvbMyxw4eHByksVjspsfjmeG75pU2yoXNr478t6TgaGlhTV6vUaJUNgiBXUW5EQgEXmLnjo6O4mlbWkNRfgV49wvmiqPR6ANZlidllwsI1pjX2hy8lnu5HJRKpfvDw8P3UKUWZ6Vq10hmLgpyM/8G/X7/3eXl5c9EUcZ0Snu5oJsQUuQNFtF1/cXIyMh7BE3zrw7eUyuxY/mQCFdfAQWDwc6FhYXu+fn5zooP45hXmf+XJ5Jija3IjvtpsySxIj6sLcXd9Pf3V3cUCoUMbDYrzInvJ0BjwjtVSEFNAAAAAElFTkSuQmCC"
+  IMAGE = "📱"
+  LINE = '---'
   API_URL = "http://localhost:3000/"
 
   def update!
@@ -27,15 +27,23 @@ class VodafoneUsage
       @json ||= JSON.parse(Net::HTTP.get(url))['mobile']
     end
 
+    def percent_used
+      @percent_used ||= json['percent_used'].ceil
+    end
+
     def percent_remaining
-      @percent_remaining ||= '%d' % json['percent_remaining']
+      @percent_remaining ||= json['percent_remaining'].floor
     end
 
     def status
-      # '%s%%|image=%s' % [ percent_remaining, VODAFONE_LOGO ]
-      '%s%s%%' % [ PHONE_LOGO, percent_remaining ]
+      status = []
+      status << '%s%s%%' % [ IMAGE, percent_used ]
+      status << LINE
+      status << 'Used: %s%%' % [ percent_used ]
+      status << 'Remaining: %s%%' % [ percent_remaining ]
+      status << LINE
+      status.join("\n")
     end
-
 end
 
 VodafoneUsage.new.update!

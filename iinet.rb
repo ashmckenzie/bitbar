@@ -9,8 +9,8 @@ require 'json'
 require 'net/http'
 
 class IINetUsage
-  INTERNET_LOGO = "📡"
-  IINET_LOGO = ""
+  IMAGE = "📡"
+  LINE = '---'
   API_URL = "http://localhost:3000/"
 
   def update!
@@ -27,15 +27,22 @@ class IINetUsage
       @json ||= JSON.parse(Net::HTTP.get(url))['internet']
     end
 
+    def percent_used
+      @percent_used ||= json['percent_used'].ceil
+    end
+
     def percent_remaining
-      @percent_remaining ||= '%d' % json['percent_remaining']
+      @percent_remaining ||= json['percent_remaining'].floor
     end
 
     def status
-      # '%s%%|image=%s' % [ percent_remaining, IINET_LOGO ]
-      '%s%s%%' % [ INTERNET_LOGO, percent_remaining ]
+      status = []
+      status << '%s%s%%' % [ IMAGE, percent_used ]
+      status << LINE
+      status << 'Used: %s%%' % [ percent_used ]
+      status << 'Remaining: %s%%' % [ percent_remaining ]
+      status << LINE
     end
-
 end
 
 IINetUsage.new.update!
