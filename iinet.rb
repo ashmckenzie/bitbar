@@ -35,12 +35,20 @@ class IINetUsage
       @percent_remaining ||= json['percent_remaining'].floor
     end
 
+    def days_remaining
+      @days_remaining ||= json['days_remaining']
+    end
+
     def status
       status = []
       status << '%s%s%%' % [ IMAGE, percent_used ]
       status << LINE
-      status << 'Used: %s%%' % [ percent_used ]
-      status << 'Remaining: %s%%' % [ percent_remaining ]
+      status << 'DATA | font=Arial-Bold'
+      status << 'used: %s%%' % [ percent_used ]
+      status << 'remaining: %s%%' % [ percent_remaining ]
+      status << LINE
+      status << 'DAYS | font=Arial-Bold'
+      status << 'remaining: %s' % [ days_remaining ]
       status << LINE
     end
 end
