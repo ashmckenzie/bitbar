@@ -11,7 +11,8 @@ require 'net/http'
 class VodafoneUsage
   IMAGE = "📱"
   LINE = '---'
-  API_URL = "http://localhost:3000/"
+  API_URL = "https://usage.apps.mine.nu/"
+  DIVIDER = 1024
 
   def update!
     puts status
@@ -24,7 +25,15 @@ class VodafoneUsage
     end
 
     def json
-      @json ||= JSON.parse(Net::HTTP.get(url))['mobile']
+      @json ||= JSON.parse(Net::HTTP.get(url))['data']['mobile']
+    end
+
+    def used
+      @used ||= json['used'] / DIVIDER
+    end
+
+    def remaining
+      @remaining ||= json['remaining'] / DIVIDER
     end
 
     def percent_used
@@ -44,8 +53,8 @@ class VodafoneUsage
       status << '%s%s%%' % [ IMAGE, percent_used ]
       status << LINE
       status << 'DATA | font=Arial-Bold'
-      status << 'used: %s%%' % [ percent_used ]
-      status << 'remaining: %s%%' % [ percent_remaining ]
+      status << 'used: %s MB (%s%%)' % [ used, percent_used ]
+      status << 'remaining: %s MB (%s%%)' % [ remaining, percent_remaining ]
       status << LINE
       status << 'DAYS | font=Arial-Bold'
       status << 'remaining: %s' % [ days_remaining ]
