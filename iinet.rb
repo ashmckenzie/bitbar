@@ -28,12 +28,20 @@ class IINetUsage
       @json ||= JSON.parse(Net::HTTP.get(url))['data']['internet']
     end
 
+    def total
+      @total ||= json['quota'] / DIVIDER
+    end
+
     def used
       @used ||= json['used'] / DIVIDER
     end
 
     def remaining
       @remaining ||= json['remaining'] / DIVIDER
+    end
+
+    def remaining_per_day
+      @remaining_per_day ||= (json['remaining'] / days_remaining) / DIVIDER
     end
 
     def percent_used
@@ -53,8 +61,9 @@ class IINetUsage
       status << '%s%s%%' % [ IMAGE, percent_used ]
       status << LINE
       status << 'DATA | font=Arial-Bold'
+      status << 'total: %s GB' % [ total ]
       status << 'used: %s GB (%s%%)' % [ used, percent_used ]
-      status << 'remaining: %s GB (%s%%)' % [ remaining, percent_remaining ]
+      status << 'remaining: %s GB (%s%%, %s GB p/day)' % [ remaining, percent_remaining, remaining_per_day ]
       status << LINE
       status << 'DAYS | font=Arial-Bold'
       status << 'remaining: %s' % [ days_remaining ]

@@ -28,12 +28,26 @@ class VodafoneUsage
       @json ||= JSON.parse(Net::HTTP.get(url))['data']['mobile']
     end
 
+    def total
+      @total ||= json['quota'] / DIVIDER
+    end
+
     def used
       @used ||= json['used'] / DIVIDER
     end
 
     def remaining
       @remaining ||= json['remaining'] / DIVIDER
+    end
+
+    def remaining_per_day
+      @remaining_per_day ||= begin
+				if days_remaining > 0
+					(json['remaining'] / days_remaining) / DIVIDER
+				else
+					0
+				end
+			end
     end
 
     def percent_used
@@ -53,8 +67,9 @@ class VodafoneUsage
       status << '%s%s%%' % [ IMAGE, percent_used ]
       status << LINE
       status << 'DATA | font=Arial-Bold'
+      status << 'total: %s MB' % [ total ]
       status << 'used: %s MB (%s%%)' % [ used, percent_used ]
-      status << 'remaining: %s MB (%s%%)' % [ remaining, percent_remaining ]
+      status << 'remaining: %s MB (%s%%, %s MB p/day)' % [ remaining, percent_remaining, remaining_per_day ]
       status << LINE
       status << 'DAYS | font=Arial-Bold'
       status << 'remaining: %s' % [ days_remaining ]
